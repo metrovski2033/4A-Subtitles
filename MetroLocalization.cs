@@ -12,6 +12,12 @@ namespace _4A_Subtitles
   {
     public char[] MetroTable { get; set; } = new char[0];
 
+    // Payload of the leading version chunk (4 bytes after "0, 4"). It is 0 in the
+    // English localization and 1 in the Japanese one, so it must be preserved on
+    // save instead of being hard-coded to 0 (otherwise an edited stable_jp.lng
+    // would no longer match what the game expects).
+    public int HeaderFlag { get; set; } = 0;
+
     public ObservableCollection<MetroPair> MetroPairs { get; set; } = new ObservableCollection<MetroPair>();
 
     public void Read(BinaryReader reader)
@@ -20,7 +26,7 @@ namespace _4A_Subtitles
       int num2 = reader.ReadInt32();
       if (num1 != 0 || num2 != 4)
         throw new Exception(string.Format("Chunk Ver Incorrect: '{0} {1}'", (object) num1, (object) num2));
-      reader.ReadInt32();
+      this.HeaderFlag = reader.ReadInt32();
       int num3 = reader.ReadInt32();
       int num4 = reader.ReadInt32();
       if (num3 != 1)
@@ -45,7 +51,7 @@ namespace _4A_Subtitles
     {
       writer.Write(0);
       writer.Write(4);
-      writer.Write(0);
+      writer.Write(this.HeaderFlag);
       this.BuildMetroTable();
       writer.Write(1);
       writer.Write(this.MetroTable.Length * 2);

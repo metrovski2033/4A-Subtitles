@@ -82,7 +82,10 @@ namespace _4A_Subtitles
               int num = (int) MessageBox.Show("Incorrect File Path...", "Localization Bad Format...", MessageBoxButton.OK, MessageBoxImage.Hand);
               return;
             }
-            using (FileStream output = File.OpenWrite(path))
+            // File.Create (not OpenWrite) so the file is truncated: otherwise
+            // saving a smaller file over a larger one (e.g. after deleting
+            // entries) would leave stale trailing bytes and corrupt the .lng.
+            using (FileStream output = File.Create(path))
             {
               using (BinaryWriter writer = new BinaryWriter((Stream) output))
               {
